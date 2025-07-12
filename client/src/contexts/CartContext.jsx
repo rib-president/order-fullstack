@@ -6,7 +6,10 @@ export function CartProvider({ children }) {
     const [cart, setCart] = useState([]);
 
     useEffect(() => {
-        fetch('http://localhost:4000/cart')
+        fetch('http://localhost:4000/cart', {
+            method: 'GET',
+            credentials: 'include'
+        })
             .then(res => res.json())
             .then(data => setCart(data));
     }, []);
@@ -17,6 +20,7 @@ export function CartProvider({ children }) {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(item),
+          credentials: 'include'
         });
         const data = await res.json();
         if (!res.ok) return { success: false, message: data.message || '장바구니 추가 실패' };
@@ -25,7 +29,8 @@ export function CartProvider({ children }) {
       };
 
     const removeItem = async (id) => {
-        await fetch(`http://localhost:4000/cart/${id}`, { method: 'DELETE' });
+        await fetch(`http://localhost:4000/cart/${id}`, { method: 'DELETE',
+        credentials: 'include' });
         setCart(prev => prev.filter(item => item.id !== id));
     };
 
@@ -34,6 +39,7 @@ export function CartProvider({ children }) {
             method: 'PATCH',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ qty }),
+            credentials: 'include'
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.message || '수량 업데이트 실패');
@@ -42,7 +48,8 @@ export function CartProvider({ children }) {
 
     const clearCart = async () => {
         const res = await fetch('http://localhost:4000/cart', {
-            method: 'DELETE'
+            method: 'DELETE',
+            credentials: 'include'
         });
         const data = await res.json();
         if (!res.ok) throw new Error(data.message || '장바구니 비우기 실패');

@@ -17,7 +17,7 @@ router.post('/', (req, res) => {
         product.stock -= orderItem.qty;
     }
 
-    cart = [];
+    req.session.cart = [];
 
     res.status(200).json({ message: '주문 완료' });
 });

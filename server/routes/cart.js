@@ -2,9 +2,9 @@ const express = require('express');
 const router = express.Router();
 const products = require('../data/products');
 
-let cart = [];
 
 router.get('/', (req, res) => {
+    const cart = req.session.cart || [];
     const data = cart.map(item => {
         const product = products.find(p => p.id === Number(item.id));
         return {
@@ -24,8 +24,10 @@ router.post('/', (req, res) => {
 
     const product = products.find((item) => item.id === Number(id));
     if(!product) return res.status(404).json({ message: '상품 없음' });
+
+    if (!req.session.cart) req.session.cart = [];
     
-    const existing = cart.find(item => item.id === id);
+    const existing = req.session.cart.find(item => item.id === id);
     const newQty = (existing?.qty || 0) + Number(qty);
 
     if(product.stock < newQty) {
@@ -35,10 +37,10 @@ router.post('/', (req, res) => {
     if (existing) {
         existing.qty = newQty;
     } else {
-        cart.push({ id, name, price, image: product.images[0], qty });
+        req.session.cart.push({ id, name, price, image: product.images[0], qty });
     }
 
-    const data = cart.map(item => {
+    const data = req.session.cart.map(item => {
         const product = products.find(p => p.id === Number(item.id));
         return {
             ...item,
@@ -59,6 +61,7 @@ router.patch('/:id', (req, res) => {
         return res.status(400).json({ message: '재고보다 큰 수량 입력으로 실패' });
     }
 
+    const cart = req.session.cart || [];
     const item = cart.find(item => item.id === id);
     if (item) {
         item.qty = qty;
@@ -77,13 +80,14 @@ router.patch('/:id', (req, res) => {
 });
 
 router.delete('/:id', (req, res) => {
+    const cart = req.session.cart || [];
     cart = cart.filter(item => item.id !== req.params.id);
     res.json(cart);
 });
 
 router.delete('/', (req, res) => {
-    cart = [];
-    res.json(cart);
+    req.session.cart = [];
+    res.json([]);
 });
 
 module.exports = router;
