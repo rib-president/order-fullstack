@@ -8,7 +8,7 @@ export default function ProductDetailPage() {
     const { id } = useParams();
     const { addItem } = useCart();
     const [thumb, setThumb] = useState(0);
-    const [qty, setQty] = useState(1);
+    const [qty, setQty] = useState("1");
     const { mutate, isPending, isSuccess, isError, error } = useAddToCart();
 
     const { data, isLoading } = useQuery({
@@ -22,7 +22,16 @@ export default function ProductDetailPage() {
     const { name, price, desc, images, stock } = data;
 
     const handleAdd = () => {
-        mutate({ id, name, price, qty});
+        const numericQty = parseInt(qty, 10);
+        if (isNaN(numericQty) || numericQty < 1 || numericQty > stock) return;
+        mutate({ id, name, price, qty: numericQty});
+    };
+
+    const handleQtyChange = (e) => {
+        const val = e.target.value;
+        if (/^\d*$/.test(val)) {
+            setQty(val);
+        }
     };
 
     return (
@@ -45,11 +54,12 @@ export default function ProductDetailPage() {
             <p className="mt-2 text-sm">{stock>0 ? `재고: ${stock}` : '품절'}</p>
 
             <div className="mt-6 flex items-center gap-4">
-                <input type="number"
-                    min="1"
+                <input type="text"
+                    inputMode="numeric"
+                    pattern="[0-9]*"                    
                     max={stock}
                     value={qty}
-                    onChange={e => setQty(+e.target.value)}
+                    onChange={handleQtyChange}
                     className="border px-2 py-1 w-24" />
                 <button
                     disabled={stock===0 || qty>stock || isPending}
