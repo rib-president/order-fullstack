@@ -20,7 +20,7 @@ export function CartProvider({ children }) {
         });
         const data = await res.json();
         if (!res.ok) return { success: false, message: data.message || '장바구니 추가 실패' };
-        setCart(data);
+        setCart(data.cart);
         return { success: true };
       };
 

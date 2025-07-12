@@ -32,7 +32,7 @@ export default function ProductListPage() {
 
     return (
         <div className="px-4">
-            <div className="sticky top-0 z-10 bg-white p-2 md:flex md:items-center md:justify-between gep-4 shadow-sm">
+            <div className="sticky top-16 z-10 bg-white p-2 md:flex md:items-center md:justify-between gap-4 shadow-sm">
                 <SearchBar onSearch={handleSearch} />
 
                 <div className="w-full sm:w-auto">

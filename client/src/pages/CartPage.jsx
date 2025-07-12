@@ -3,7 +3,7 @@ import { useCart } from '../contexts/CartContext';
 
 export default function CartPage() {
     const [qtyMap, setQtyMap] = useState({});
-    const { items, updateQty, removeItem, clearCart } = useCart();
+    const { items = [], updateQty, removeItem, clearCart } = useCart();
     const [isOrderModalOpen, setOrderModalOpen] = useState(false);
 
     const [orderError, setOrderError] = useState(null);
