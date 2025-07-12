@@ -8,24 +8,32 @@ import useScrollRestoration from '../hooks/useScrollRestoration';
 export default function ProductListPage() {
     useScrollRestoration('product-list-scroll');
 
-    const [keyword, setKeyword] = useState('');
+    const [searchParams, setSearchParams] = useState({
+        type: 'name', keyword: '', min: '', max: ''
+    });
     const [sort, setSort] = useState('default');
+
+    const { type, keyword, min, max } = searchParams;
     const { 
         data, 
         fetchNextPage,
         hasNextPage,
         isFetchingNextPage,
         isLoading, 
-        error } = useProducts(keyword, sort);
+        error } = useProducts({ type, keyword, min, max, sort });
 
     useEffect(() => {
         window.scrollTo(0, 0);
     }, [keyword, sort]);
 
+    const handleSearch = (params) => {        
+        setSearchParams(params);
+    }
+
     return (
         <div className="px-4">
             <div className="sticky top-0 z-10 bg-white p-2 md:flex md:items-center md:justify-between gep-4 shadow-sm">
-                <SearchBar onSearch={setKeyword} />
+                <SearchBar onSearch={handleSearch} />
 
                 <div className="w-full sm:w-auto">
                     <label htmlFor="sort" className="mr-2 font-semibold">정렬:</label>

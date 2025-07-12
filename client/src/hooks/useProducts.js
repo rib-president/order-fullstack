@@ -1,10 +1,20 @@
 import { useInfiniteQuery } from '@tanstack/react-query';
 
-export function useProducts(keyword, sort) {
+export function useProducts({ type, keyword, min, max, sort }) {
     return useInfiniteQuery({
-        queryKey: ['products', keyword, sort],
+        queryKey: ['products', type, keyword, min, max, sort],
         queryFn: async ({ pageParam = 1 }) => {
-            const res = await fetch(`http://localhost:4000/products?keyword=${keyword}&page=${pageParam}&size=10&sort=${sort}`);
+            const params = new URLSearchParams();
+            params.set('page', pageParam);
+            params.set('sort', sort);                        
+            params.set('type', type);
+            if (type === 'price') {
+                if (min) params.set('min', min);
+                if (max) params.set('max', max);
+            } else {                                
+                params.set('keyword', keyword);
+            }
+            const res = await fetch(`http://localhost:4000/products?${params}`);
             return res.json();
         },
         getNextPageParam: (lastPage, allPages) => {

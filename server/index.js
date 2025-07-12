@@ -73,12 +73,26 @@ const products = [
 
 let cart = [];
 
-app.get('/products', (req, res) => {
-    const { keyword = '', page = 1, size = 10, sort = 'default' } = req.query;
+app.get('/products', (req, res) => {    
+    const { type, keyword, min, max, page = 1, size = 10, sort = 'default' } = req.query;
+    let filtered = [...products];
 
-    let filtered = products.filter(product =>
-        product.name.toLowerCase().includes(keyword.toLowerCase())    
-    );
+    if (type === 'name' && keyword) {
+        filtered = filtered.filter(p => p.name.toLowerCase().includes(keyword.toLowerCase()));
+    } else if (type === 'id' && keyword) {
+        filtered = filtered.filter(p => String(p.id) === String(keyword));
+    } else if (type === 'price') {                
+        const minPrice = parseInt(min, 10);
+        const maxPrice = parseInt(max, 10);
+        
+        if (!isNaN(minPrice)) {            
+            filtered = filtered.filter(p => p.price >= minPrice);        
+        }
+        if (!isNaN(maxPrice)) {        
+            filtered = filtered.filter(p => p.price <= maxPrice);            
+        }
+        
+    }
 
     if(sort === 'price_asc') {
         filtered = filtered.sort((a, b) => a.price - b.price);
