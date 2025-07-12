@@ -71,6 +71,8 @@ const products = [
       ], stock: 140 }
 ];
 
+let cart = [];
+
 app.get('/products', (req, res) => {
     const { keyword = '', page = 1, size = 10, sort = 'default' } = req.query;
 
@@ -100,6 +102,29 @@ app.get('/products/:id', (req, res) => {
     const p = products.find((v) => v.id == req.params.id);
     if(!p) return res.status(404).json({ error: 'NOT_FOUND' });
     res.json(p);
+})
+
+app.post('/cart', (req, res) => {
+    const { id, name, price, qty } = req.body;
+    if (!id || !name || !price || !qty) {
+        return res.status(400).json({ message: '필수 항목 누락'});
+    }
+
+    const product = products.find((item) => item.id === Number(id));
+    const existing = cart.find(item => item.id === id);
+    const newQty = existing ? existing.qty + Number(qty) : Number(qty);
+
+    if(product.stock < newQty) {
+        return res.status(400).json({ message: '재고보다 큰 수량 입력으로 실패' });
+    }
+
+    if (existing) {
+        existing.qty = newQty;
+    } else {
+        cart.push({ id, name, price, qty });
+    }
+
+    res.status(201).json({ message: '장바구니에 추가됨', cart });
 })
 
 app.listen(PORT, () => {

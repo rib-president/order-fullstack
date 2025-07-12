@@ -2,24 +2,28 @@ import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useCart } from '../contexts/CartContext';
+import { useAddToCart } from '../hooks/useAddToCart';
 
 export default function ProductDetailPage() {
     const { id } = useParams();
     const { addItem } = useCart();
     const [thumb, setThumb] = useState(0);
     const [qty, setQty] = useState(1);
+    const { mutate, isPending, isSuccess, isError, error } = useAddToCart();
 
-    const { data, isLoading, error } = useQuery({
+    const { data, isLoading } = useQuery({
         queryKey: ['product', id],
         queryFn: () => fetch(`http://localhost:4000/products/${id}`).then(r => r.json())
     });
 
     if (isLoading) return <p className="p-4">로딩...</p>;
-    if (error) return <p className="p-4 text-red-500">에러!</p>
+    if (!data) return <p className="p-4 text-red-500">데이터 없음</p>
 
     const { name, price, desc, images, stock } = data;
 
-    const handleAdd = () => addItem({ id, name, price, qty });
+    const handleAdd = () => {
+        mutate({ id, name, price, qty});
+    };
 
     return (
         <div className="max-w-screen-md mx-auto p-4">
@@ -48,13 +52,15 @@ export default function ProductDetailPage() {
                     onChange={e => setQty(+e.target.value)}
                     className="border px-2 py-1 w-24" />
                 <button
-                    disabled={stock===0 || qty>stock}
+                    disabled={stock===0 || qty>stock || isPending}
                     onClick={handleAdd}
                     className="bg-blue-600 text-white px-6 py-2 rounded disabled:bg-gray-400">
-                        장바구니 담기
+                        {isPending ? '추가 중...' : '장바구니 담기'}
                     </button>
             </div>
             {qty>stock && <p className="text-red-500 mt-2">재고보다 많은 수량입니다.</p>}
+            {isSuccess && <p className="text-green-600 mt-2">장바구니에 추가되었습니다.</p>}
+            {isError && <p className="text-red-500 mt-2">{error.message}</p>}
         </div>
     );
 }
