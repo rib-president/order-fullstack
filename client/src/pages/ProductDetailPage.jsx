@@ -2,14 +2,14 @@ import { useParams } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { useState } from 'react';
 import { useCart } from '../contexts/CartContext';
-import { useAddToCart } from '../hooks/useAddToCart';
 
 export default function ProductDetailPage() {
     const { id } = useParams();
     const { addItem } = useCart();
     const [thumb, setThumb] = useState(0);
     const [qty, setQty] = useState("1");
-    const { mutate, isPending, isSuccess, isError, error } = useAddToCart();
+    const [message, setMessage] = useState(null);
+    const [messageType, setMessageType] = useState(null);
 
     const { data, isLoading } = useQuery({
         queryKey: ['product', id],
@@ -21,10 +21,17 @@ export default function ProductDetailPage() {
 
     const { name, price, desc, images, stock } = data;
 
-    const handleAdd = () => {
+    const handleAdd = async () => {
         const numericQty = parseInt(qty, 10);
         if (isNaN(numericQty) || numericQty < 1 || numericQty > stock) return;
-        mutate({ id, name, price, qty: numericQty});
+        const result = await addItem({ id, name, price, qty: numericQty});
+        if (result.success) {
+            setMessage('장바구니에 추가 성공');
+            setMessageType('success');
+        } else {
+            setMessage(result.message);
+            setMessageType('error');
+        }
     };
 
     const handleQtyChange = (e) => {
@@ -62,15 +69,18 @@ export default function ProductDetailPage() {
                     onChange={handleQtyChange}
                     className="border px-2 py-1 w-24" />
                 <button
-                    disabled={stock===0 || qty>stock || isPending}
+                    disabled={stock===0 || qty>stock}
                     onClick={handleAdd}
                     className="bg-blue-600 text-white px-6 py-2 rounded disabled:bg-gray-400">
-                        {isPending ? '추가 중...' : '장바구니 담기'}
+                        장바구니 담기
                     </button>
             </div>
             {qty>stock && <p className="text-red-500 mt-2">재고보다 많은 수량입니다.</p>}
-            {isSuccess && <p className="text-green-600 mt-2">장바구니에 추가되었습니다.</p>}
-            {isError && <p className="text-red-500 mt-2">{error.message}</p>}
+            {message && (
+                <p className={messageType === 'success' ? 'text-green-600 mt-2' : 'text-red-500 mt-2'}>
+                    {message}
+                </p>
+            )}
         </div>
     );
 }

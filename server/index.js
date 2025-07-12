@@ -117,20 +117,28 @@ app.post('/cart', (req, res) => {
     const newQty = (existing?.qty || 0) + Number(qty);
 
     if(product.stock < newQty) {
-        return res.status(400).json({ message: '재고보다 큰 수량 입력으로 실패' });
+        return res.status(400).json({ message: '재고 부족' });
     }
 
     if (existing) {
         existing.qty = newQty;
     } else {
-        cart.push({ id, name, price, qty });
+        cart.push({ id, name, price, image: product.images[0], qty });
     }
 
     res.status(201).json({ message: '장바구니에 추가됨', cart });
 })
 
 app.get('/cart', (req, res) => {
-    res.json(cart);
+    const data = cart.map(item => {
+        const product = products.find(p => p.id === Number(item.id));
+        return {
+            ...item,
+            stock: product?.stock ?? 0,
+        };
+    });
+
+    res.json(data);
 });
 
 app.patch('/cart/:id', (req, res) => {
@@ -146,7 +154,15 @@ app.patch('/cart/:id', (req, res) => {
     const item = cart.find(item => item.id === id);
     if (item) {
         item.qty = qty;
-        res.json(cart);
+
+        const data = cart.map(item => {
+            const product = products.find(p => p.id === Number(item.id));
+            return {
+                ...item,
+                stock: product?.stock ?? 0,
+            };
+        });
+        res.json(data);
     } else {
         res.status(404).json({ message: '장바구니에 상품 없음' });
     }
@@ -157,6 +173,12 @@ app.delete('/cart/:id', (req, res) => {
     cart = cart.filter(item => item.id !== req.params.id);
     res.json(cart);
 });
+
+
+app.delete('/cart', (req, res) => {
+    cart = [];
+    res.json(cart);
+})
 
 
 app.listen(PORT, () => {

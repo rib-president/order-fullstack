@@ -1,8 +1,9 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useCart } from '../contexts/CartContext';
 
 export default function CartPage() {
-    const { items, updateItemQty, removeItem, clearCart } = useCart();
+    const [qtyMap, setQtyMap] = useState({});
+    const { items, updateQty, removeItem, clearCart } = useCart();
     const [isOrderModalOpen, setOrderModalOpen] = useState(false);
 
     const totalPrice = items.reduce((sum, item) => sum + item.price * item.qty, 0);
@@ -15,6 +16,14 @@ export default function CartPage() {
         setOrderModalOpen(false);
         clearCart();
     };
+
+    useEffect(() => {
+        const initialMap = {};
+        items.forEach(item => {
+            initialMap[item.id] = item.qty;
+        });
+        setQtyMap(initialMap);
+    }, [items]);
 
     if (items.length === 0) {
         return <p className="p-4 text-center text-gray-500">장바구니가 비어 있습니다.</p>;
@@ -32,34 +41,36 @@ export default function CartPage() {
                             <h2 className="font-semibold text-lg">{name}</h2>
                             <p className="text-gray-600">{price.toLocaleString()}원</p>
 
-                            <div className="mt-2 flex items-center gap-2">
-                                <button
-                                    onClick={() => updateItemQty(id, Math.max(1, qty - 1))}
-                                    className="border px-2 py-1 rounded disabled:opacity-50"
-                                    disabled={qty <= 1}
-                                >
-                                    -
-                                </button>
+                            <div className="mt-2 flex items-center gap-2">                                
                                 <input 
                                     type="number"
                                     min={1}
                                     max={stock}
-                                    value={qty}
+                                    value={qtyMap[id] ?? qty}                                    
                                     onChange={(e) => {
-                                        let val = parseInt(e.target.value, 10);
-                                        if (isNaN(val)) val = 1;
-                                        if (val > stock) val = stock;
-                                        if (val < 1) val = 1;
-                                        updateItemQty(id, val);
+                                        let value = e.target.value;
+
+                                        if (!/^\d*$/.test(value)) return;
+
+                                        let numericValue = parseInt(value, 10);
+
+                                        if(numericValue > parseInt(stock, 10))  numericValue = stock;
+                                        console.log(numericValue, stock);                                        
+                                
+                                        setQtyMap(prev => ({ ...prev, [id]: numericValue.toString() }));
+                                        
                                     }}
-                                    className="w-12 text-center border rounded"
+                                    className="w-20 text-center border rounded"
                                 />
                                 <button
-                                    onClick={() => updateItemQty(id, Math.min(stock, qty + 1))}
-                                    className="border px-2 py-1 rounded disabled:opacity-50"
-                                    disabled={qty >= stock}
+                                    onClick={() => {
+                                        let val = parseInt(qtyMap[id], 10);                                        
+                                        updateQty(id, val);
+                                    }}
+                                    className="ml-2 px-2 py-1 bg-blue-600 text-white rounded"
+                                    disabled={parseInt(qtyMap[id], 10) > stock}
                                 >
-                                    +
+                                    변경
                                 </button>
                             </div>
                         </div>
@@ -78,7 +89,7 @@ export default function CartPage() {
             </ul>
 
             <div className="mt-6 flex justify-between items-center font-bold text-xl">
-                <spane>총 합계:</spane>
+                <span>총 합계:</span>
                 <span>{totalPrice.toLocaleString()}원</span>
             </div>
 
@@ -104,7 +115,7 @@ export default function CartPage() {
                         </button>
                     </div>
                 </div>
-            )};
+            )}
         </div>
     );
 }
