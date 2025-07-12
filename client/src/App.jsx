@@ -8,7 +8,7 @@ function App() {
   return (
     <>
       <Header />
-      <main className="pt-4 relative">
+      <main className="pt-20 min-h-screen relative">
         <Routes>
           <Route path="/products" element={<ProductListPage />} />
           <Route path="/products/:id" element={<ProductDetailPage />} />

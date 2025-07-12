@@ -32,7 +32,7 @@ export default function ProductListPage() {
 
     return (
         <div className="px-4">
-            <div className="sticky top-16 z-10 bg-white p-2 md:flex md:items-center md:justify-between gap-4 shadow-sm">
+            <div className="sticky top-16 z-10 bg-white p-2 md:flex md:items-center md:justify-between gap-4 shadow-sm">            
                 <SearchBar onSearch={handleSearch} />
 
                 <div className="w-full sm:w-auto">
@@ -48,13 +48,13 @@ export default function ProductListPage() {
                         <option value="price_desc">가격 내림차순</option>
                         <option value="latest">최신순</option>
                     </select>
-                </div>
-
-                {isLoading && <p className="p-4">로딩 중...</p>}
-                {error && <p className="p-4 text-red-500">에러 발생: {error.message}</p>}
+                </div>                
             </div>
+
+            {isLoading && <p className="p-4">로딩 중...</p>}
+            {error && <p className="p-4 text-red-500">에러 발생: {error.message}</p>}
                 
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 pb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 pb-8 max-w-full overflow-x-hidden">
                 {data?.pages.flatMap(page =>
                     page.items.map(product => (
                         <ProductCard key={product.id} product={product} />

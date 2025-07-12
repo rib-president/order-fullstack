@@ -70,3 +70,25 @@ button:focus-visible {
     background-color: #f9f9f9;
   }
 }
+
+html, body {
+  overflow-x: hidden;
+  width: 100%;
+}
+
+#root {
+  width: 100%;
+  overflow-x: hidden;
+}
+
+.grid-container {
+  overflow-x: hidden;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
+.product-card {
+  max-width: 100%;
+  box-sizing: border-box;
+  word-break: break-word;
+}
