@@ -140,7 +140,15 @@ app.post('/cart', (req, res) => {
         cart.push({ id, name, price, image: product.images[0], qty });
     }
 
-    res.status(201).json({ message: '장바구니에 추가됨', cart });
+    const data = cart.map(item => {
+        const product = products.find(p => p.id === Number(item.id));
+        return {
+            ...item,
+            stock: product?.stock ?? 0,
+        };
+    });
+
+    res.status(201).json({ message: '장바구니에 추가됨', cart: data });
 })
 
 app.get('/cart', (req, res) => {

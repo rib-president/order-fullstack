@@ -52,7 +52,7 @@ export default function CartPage() {
             <h1 className="text-3xl font-bold mb-6">장바구니</h1>
 
             <ul className="space-y-4">
-                {items.map(({ id, name, price, qty, image, stock}) => (
+                {items.map(({ id, name, price, qty, image, stock = 0}) => (
                     <li key={id} className="flex items-center gap-4 border p-4 rounded">
                         <img src={image} alt={name} className="w-20 h-20 object-cover rounded" /> 
                         <div className="flex-1">
@@ -64,16 +64,18 @@ export default function CartPage() {
                                     type="number"
                                     min={1}
                                     max={stock}
-                                    value={qtyMap[id] ?? qty}                                    
+                                    value={isNaN(Number(qtyMap[id])) || qtyMap[id] === ''
+                                        ? '' : qtyMap[id]}
                                     onChange={(e) => {
                                         let value = e.target.value;
 
-                                        if (!/^\d*$/.test(value)) return;
+                                        if (!/^\d*$/.test(value)) return;                                
 
                                         let numericValue = parseInt(value, 10);
 
                                         if(numericValue > parseInt(stock, 10))  numericValue = stock;
-                                        console.log(numericValue, stock);                                        
+
+                                        if(numericValue == 0) numericValue = 1;
                                 
                                         setQtyMap(prev => ({ ...prev, [id]: numericValue.toString() }));
                                         
@@ -85,8 +87,10 @@ export default function CartPage() {
                                         let val = parseInt(qtyMap[id], 10);                                        
                                         updateQty(id, val);
                                     }}
-                                    className="ml-2 px-2 py-1 bg-blue-600 text-white rounded"
-                                    disabled={parseInt(qtyMap[id], 10) > stock}
+                                    className="ml-2 px-2 py-1 bg-blue-600 text-white rounded disabled:bg-gray-400 disabled:cursor-not-allowed"
+                                    disabled={
+                                        isNaN(parseInt(qtyMap[id], 10)) || parseInt(qtyMap[id], 10) < 1 || parseInt(qtyMap[id], 10) > stock
+                                    }
                                 >
                                     변경
                                 </button>
