@@ -6,10 +6,28 @@ export default function CartPage() {
     const { items, updateQty, removeItem, clearCart } = useCart();
     const [isOrderModalOpen, setOrderModalOpen] = useState(false);
 
+    const [orderError, setOrderError] = useState(null);
+
     const totalPrice = items.reduce((sum, item) => sum + item.price * item.qty, 0);
 
-    const handleOrder = () => {
-        setOrderModalOpen(true);
+    const handleOrder = async () => {
+        setOrderError(null);
+
+        try {
+            const res = await fetch('http://localhost:4000/order', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ items }),
+            });
+            const data = await res.json();
+            if (!res.ok) {
+                throw new Error(data.message || '주문 실패');
+            }
+            
+            setOrderModalOpen(true);            
+        } catch (e) {
+            setOrderError(e.message);
+        }
     };
 
     const handleCloseModal = () => {
@@ -25,7 +43,7 @@ export default function CartPage() {
         setQtyMap(initialMap);
     }, [items]);
 
-    if (items.length === 0) {
+    if (items.length === 0 && !isOrderModalOpen) {
         return <p className="p-4 text-center text-gray-500">장바구니가 비어 있습니다.</p>;
     }
 
@@ -110,6 +128,20 @@ export default function CartPage() {
                         <button
                             onClick={handleCloseModal}
                             className="bg-blue-600 text-white px-6 py-2 rounded hover-bg-blue-700"
+                        >
+                            닫기
+                        </button>
+                    </div>
+                </div>
+            )}
+            {orderError && (
+                <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
+                    <div className="bg-white p-8 rounded max-w-sm text-center">
+                        <h2 className="text-2xl font-bold mb-4">주문 실패!</h2>
+                        <p className="mb-6">{orderError}</p>
+                        <button
+                            onClick={handleCloseModal}
+                            className="bg-red-600 text-white px-6 py-2 rounded hover-bg-blue-700"
                         >
                             닫기
                         </button>
