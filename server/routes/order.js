@@ -15,9 +15,9 @@ router.post('/', (req, res) => {
         }
 
         product.stock -= orderItem.qty;
+        
+        req.session.cart = (req.session.cart || []).filter(item => item.id !== orderItem.id);
     }
-
-    req.session.cart = [];
 
     res.status(200).json({ message: '주문 완료' });
 });

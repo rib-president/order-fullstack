@@ -3,21 +3,30 @@ import { useCart } from '../contexts/CartContext';
 
 export default function CartPage() {
     const [qtyMap, setQtyMap] = useState({});
-    const { items = [], updateQty, removeItem, clearCart } = useCart();
+    const { items = [], fetchCart, updateQty, removeItem } = useCart();
     const [isOrderModalOpen, setOrderModalOpen] = useState(false);
-
     const [orderError, setOrderError] = useState(null);
+
+    const [selectedIds, setSelectedIds] = useState([]);
 
     const totalPrice = items.reduce((sum, item) => sum + item.price * item.qty, 0);
 
     const handleOrder = async () => {
         setOrderError(null);
 
+        if (selectedIds.length === 0) {
+            alert('주문할 상품을 선택하세요.');
+            return;
+        }
+
+        const selectedItems = items.filter(item => selectedIds.includes(item.id));
+
         try {
             const res = await fetch('http://localhost:4000/order', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ items }),
+                body: JSON.stringify({ items: selectedItems }),
+                credentials: 'include'
             });
             const data = await res.json();
             if (!res.ok) {
@@ -30,9 +39,24 @@ export default function CartPage() {
         }
     };
 
-    const handleCloseModal = () => {
+    const handleCloseModal = async () => {
         setOrderModalOpen(false);
-        clearCart();
+
+        await fetchCart();
+
+        setSelectedIds([]);
+    };
+
+    const fetchLatestCart = async() => {
+
+    }
+
+    const toggleAll = () => {
+        if (selectedIds.length === items.length) {
+            setSelectedIds([]);
+        } else {
+            setSelectedIds(items.map(item => item.id));
+        }
     };
 
     useEffect(() => {
@@ -50,10 +74,21 @@ export default function CartPage() {
     return (
         <div className="max-w-screen-md mx-auto p-4">
             <h1 className="text-3xl font-bold mb-6">장바구니</h1>
-
+            <button onClick={toggleAll} className="text-sm text-blue-500 underline mb-2">
+                {selectedIds.length === items.length ? '전체 해제' : '전체 선택'}
+            </button>
             <ul className="space-y-4">
                 {items.map(({ id, name, price, qty, image, stock = 0}) => (
                     <li key={id} className="flex items-center gap-4 border p-4 rounded">
+                        <input type="checkbox" checked={selectedIds.includes(id)}
+                            onChange={() => {
+                                setSelectedIds(prev => prev.includes(id) ?
+                                    prev.filter(itemId => itemId !== id)
+                                    : [...prev, id]
+                                );
+                            }}
+                            className="mr-2"
+                        />
                         <img src={image} alt={name} className="w-20 h-20 object-cover rounded" /> 
                         <div className="flex-1">
                             <h2 className="font-semibold text-lg">{name}</h2>

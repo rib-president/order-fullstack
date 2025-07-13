@@ -6,13 +6,19 @@ export function CartProvider({ children }) {
     const [cart, setCart] = useState([]);
 
     useEffect(() => {
-        fetch('http://localhost:4000/cart', {
+        fetchCart();
+    }, []);
+
+    
+    const fetchCart = async () => {
+        const res = await fetch('http://localhost:4000/cart', {
             method: 'GET',
             credentials: 'include'
-        })
-            .then(res => res.json())
-            .then(data => setCart(data));
-    }, []);
+        });
+        const data = await res.json();
+        setCart(data);
+        return data;
+    }
 
 
     const addItem = async (item) => {
@@ -46,18 +52,8 @@ export function CartProvider({ children }) {
         setCart(data);
     };
 
-    const clearCart = async () => {
-        const res = await fetch('http://localhost:4000/cart', {
-            method: 'DELETE',
-            credentials: 'include'
-        });
-        const data = await res.json();
-        if (!res.ok) throw new Error(data.message || '장바구니 비우기 실패');
-        setCart([]);
-    }
-
     return (
-        <CartContext.Provider value={{ items:cart, addItem, removeItem, updateQty, clearCart }}>
+        <CartContext.Provider value={{ items:cart, fetchCart, addItem, removeItem, updateQty }}>
             {children}
         </CartContext.Provider>
     );

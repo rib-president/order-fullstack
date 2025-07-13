@@ -80,14 +80,9 @@ router.patch('/:id', (req, res) => {
 });
 
 router.delete('/:id', (req, res) => {
-    const cart = req.session.cart || [];
-    cart = cart.filter(item => item.id !== req.params.id);
-    res.json(cart);
-});
+    req.session.cart = (req.session.cart || []).filter(item => item.id !== req.params.id);
 
-router.delete('/', (req, res) => {
-    req.session.cart = [];
-    res.json([]);
+    res.json({message: '장바구니 상품 삭제 성공'});
 });
 
 module.exports = router;

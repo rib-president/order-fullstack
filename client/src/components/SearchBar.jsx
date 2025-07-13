@@ -1,16 +1,23 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
-export default function SearchBar({ onSearch }) {
-    const [type, setType] = useState('name');
-    const [keyword, setKeyword] = useState('');
-    const [minPrice, setMinPrice] = useState('');
-    const [maxPrice, setMaxPrice] = useState('');
+export default function SearchBar({ onSearch, initialParams }) {
+    const [type, setType] = useState(initialParams?.type || 'name');
+    const [keyword, setKeyword] = useState(initialParams?.keyword || '');
+    const [min, setMin] = useState(initialParams?.min || '');
+    const [max, setMax] = useState(initialParams?.max || '');
+
+    useEffect(() => {
+        setType(initialParams?.type || 'name');
+        setKeyword(initialParams?.keyword || '');
+        setMin(initialParams?.min || '');
+        setMax(initialParams?.max || '');
+    }, [initialParams]);
 
     const handleSubmit = (e) => {
         e.preventDefault();
 
         if (type === 'price') {            
-            onSearch({ type, min: minPrice, max: maxPrice });
+            onSearch({ type, min, max });
         } else {
             onSearch({ type, keyword });
         }
@@ -23,7 +30,7 @@ export default function SearchBar({ onSearch }) {
                 onChange={(e) => setType(e.target.value)}
                 className="border rounded px-2 py-1"
             >
-                <option vale="name">상품명</option>
+                <option value="name">상품명</option>
                 <option value="id">상품 ID</option>
                 <option value="price">금액 범위</option>
             </select>
@@ -33,16 +40,16 @@ export default function SearchBar({ onSearch }) {
                     <input
                         type="number"
                         placeholder="최소 금액"
-                        value={minPrice}
-                        onChange={(e) => setMinPrice(e.target.value)}
+                        value={min}
+                        onChange={(e) => setMin(e.target.value)}
                         className="border rounded px-2 py-1 w-28"
                     />
                     <span>~</span>
                     <input
                         type="number"
                         placeholder="최대 금액"
-                        value={maxPrice}
-                        onChange={(e) => setMaxPrice(e.target.value)}
+                        value={max}
+                        onChange={(e) => setMax(e.target.value)}
                         className="border rounded px-2 py-1 w-28"
                     />
                 </>

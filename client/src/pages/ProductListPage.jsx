@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useProducts } from '../hooks/useProducts';
+import { useSearchParams } from 'react-router-dom';
 import ProductCard from '../components/ProductCard';
 import SearchBar from '../components/SearchBar';
 import useScrollRestoration from '../hooks/useScrollRestoration';
@@ -22,9 +23,21 @@ export default function ProductListPage() {
         isLoading, 
         error } = useProducts({ type, keyword, min, max, sort });
 
+    const [searchParamsReact, setSearchParamsReact] = useSearchParams();
+
+    useEffect(() => {
+        const reset = searchParamsReact.get('reset');
+        if (reset === '1') {
+            setSearchParams({ type: 'name', keyword: '', min: '', max: '' });
+            setSort('default');
+            setSearchParamsReact({}); // URL에서 reset 제거
+        }
+    }, [searchParamsReact]);
+
+
     useEffect(() => {
         window.scrollTo(0, 0);
-    }, [keyword, sort]);
+    }, [keyword, sort, searchParamsReact]);
 
     const handleSearch = (params) => {        
         setSearchParams(params);
@@ -32,8 +45,8 @@ export default function ProductListPage() {
 
     return (
         <div className="px-4">
-            <div className="sticky top-16 z-10 bg-white p-2 md:flex md:items-center md:justify-between gap-4 shadow-sm">            
-                <SearchBar onSearch={handleSearch} />
+            <div className="top-16 z-10 bg-white p-2 md:flex md:items-center md:justify-between gap-4 shadow-sm">            
+                <SearchBar onSearch={handleSearch} initialParams={searchParams} />
 
                 <div className="w-full sm:w-auto">
                     <label htmlFor="sort" className="mr-2 font-semibold">정렬:</label>

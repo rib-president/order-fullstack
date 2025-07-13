@@ -28,6 +28,8 @@ export default function ProductDetailPage() {
         if (result.success) {
             setMessage('장바구니에 추가 성공');
             setMessageType('success');
+
+            setTimeout(() => setMessage(''), 2000);
         } else {
             setMessage(result.message);
             setMessageType('error');

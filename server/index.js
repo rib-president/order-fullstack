@@ -18,7 +18,7 @@ app.use(session({
     secret: 'test-key',
     resave: false,
     saveUninitialized: true,
-    cookie: { secure: false},
+    cookie: { secure: false },
 }));
 
 app.use('/products', productRoutes);
